@@ -1,8 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
-from .forms import RegistrationForm, LoginForm, CourseForm
+from flask import Blueprint, render_template, redirect, url_for, flash,current_app
+from .forms import RegistrationForm, LoginForm, CourseForm, ProfileUpdateForm
 from .models import User, Course, Enrollment  # Asegúrate de importar Enrollment
 from .extensions import db
 from flask_login import current_user, login_required, login_user # Importar current_user y login_required
+import os
+from werkzeug.utils import secure_filename
+import secrets
+
 
 main_bp = Blueprint('main', __name__)
 
@@ -79,12 +83,18 @@ def create_course():
         return redirect(url_for('main.list_courses'))
     return render_template('create_course.html', form=form)
 
+@main_bp.route('/course/<int:course_id>', methods=['GET'])
+def course_detail(course_id):
+    course = Course.query.get_or_404(course_id)  # Obtiene el curso por ID
+    return render_template('course_detail.html', course=course)  # Muestra la plantilla con el curso
+
+
 @main_bp.route('/enroll/<int:course_id>', methods=['POST'])
-@login_required  # Solo los usuarios logueados pueden inscribirse en un curso
+@login_required  # Asegúrate de que solo los usuarios autenticados puedan inscribirse
 def enroll(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = Course.query.get_or_404(course_id)  # Verifica que el curso exista
     
-    # Verificar si el usuario ya está inscrito en el curso
+    # Verifica si el usuario ya está inscrito en el curso
     enrollment = Enrollment.query.filter_by(user_id=current_user.id, course_id=course_id).first()
     
     if enrollment:
@@ -97,3 +107,34 @@ def enroll(course_id):
         flash('¡Te has inscrito correctamente en el curso!', 'success')
     
     return redirect(url_for('main.list_courses'))
+
+@main_bp.route('/profile')
+@login_required  # Solo los usuarios autenticados pueden ver su perfil
+def profile():
+    user_courses = Enrollment.query.filter_by(user_id=current_user.id).all()  # Obtener todos los cursos del usuario
+    return render_template('profile.html', user=current_user, courses=user_courses)
+
+def save_picture(form_picture):
+    # Genera un nombre único para la imagen
+    random_hex = secrets.token_hex(8)  # Genera un token aleatorio
+    _, f_ext = os.path.splitext(form_picture.filename)  # Obtiene la extensión del archivo
+    picture_fn = random_hex + f_ext  # Crea un nuevo nombre para la imagen
+    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)  # Ruta donde se guardará la imagen
+
+    # Guarda la imagen en la ruta especificada
+    form_picture.save(picture_path)
+
+    return '/static/profile_pics/' + picture_fn  # Retorna la URL de la imagen
+
+@main_bp.route('/update_profile', methods=['GET', 'POST'])
+@login_required
+def update_profile():
+    form = ProfileUpdateForm()  # Asegúrate de definir este formulario
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)  # Implementa esta función para manejar la subida
+            current_user.profile_picture = picture_file
+        db.session.commit()
+        flash('Tu perfil ha sido actualizado.', 'success')
+        return redirect(url_for('main.profile'))
+    return render_template('update_profile.html', form=form)

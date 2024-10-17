@@ -12,6 +12,7 @@ class User(db.Model, UserMixin):  # Hereda de UserMixin
     username = db.Column(db.String(150), nullable=False, unique=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(256), nullable=False)
+    profile_picture = db.Column(db.String(256), nullable=True)  # Campo para la URL de la foto
 
     def set_password(self, password):
         """Establece la contraseña hasheada para el usuario."""

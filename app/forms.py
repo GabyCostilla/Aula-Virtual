@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, DateField, SubmitField, PasswordField
+from wtforms import StringField, TextAreaField, DateField, SubmitField, PasswordField, FileField,SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
 
 class RegistrationForm(FlaskForm):
@@ -20,3 +20,7 @@ class CourseForm(FlaskForm):
     start_date = DateField('Fecha de Inicio', format='%Y-%m-%d', validators=[DataRequired()])
     end_date = DateField('Fecha de Finalización', format='%Y-%m-%d', validators=[DataRequired()])
     submit = SubmitField('Crear Curso')
+
+class ProfileUpdateForm(FlaskForm):
+    picture = FileField('Actualizar Foto de Perfil', validators=[DataRequired()])
+    submit = SubmitField('Actualizar')
