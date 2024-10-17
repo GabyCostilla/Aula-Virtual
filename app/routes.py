@@ -108,33 +108,44 @@ def enroll(course_id):
     
     return redirect(url_for('main.list_courses'))
 
-@main_bp.route('/profile')
-@login_required  # Solo los usuarios autenticados pueden ver su perfil
+@main_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
-    user_courses = Enrollment.query.filter_by(user_id=current_user.id).all()  # Obtener todos los cursos del usuario
-    return render_template('profile.html', user=current_user, courses=user_courses)
+    form = ProfileUpdateForm()  # Crea una instancia del formulario
+    user_courses = Enrollment.query.filter_by(user_id=current_user.id).all()  # Obtener cursos en los que está inscrito el usuario
+
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)  # Llama a la función para guardar la imagen
+            current_user.profile_picture = picture_file  # Actualiza el campo de foto de perfil en la base de datos
+        db.session.commit()  # Guarda cambios en la base de datos
+        flash('Tu perfil ha sido actualizado.', 'success')  # Mensaje de éxito
+        return redirect(url_for('main.profile'))  # Redirige al perfil del usuario
+
+    return render_template('profile.html', user=current_user, courses=user_courses, form=form)  # Pasa el formulario a la plantilla
+
+
 
 def save_picture(form_picture):
-    # Genera un nombre único para la imagen
-    random_hex = secrets.token_hex(8)  # Genera un token aleatorio
+    random_hex = secrets.token_hex(8)  # Genera un nombre de archivo aleatorio
     _, f_ext = os.path.splitext(form_picture.filename)  # Obtiene la extensión del archivo
-    picture_fn = random_hex + f_ext  # Crea un nuevo nombre para la imagen
-    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)  # Ruta donde se guardará la imagen
+    picture_fn = random_hex + f_ext  # Combina el nombre aleatorio con la extensión
+    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)  # Define la ruta de almacenamiento
 
-    # Guarda la imagen en la ruta especificada
-    form_picture.save(picture_path)
+    form_picture.save(picture_path)  # Guarda la imagen
+    return picture_fn  # Devuelve el nombre del archivo
 
-    return '/static/profile_pics/' + picture_fn  # Retorna la URL de la imagen
 
 @main_bp.route('/update_profile', methods=['GET', 'POST'])
 @login_required
 def update_profile():
-    form = ProfileUpdateForm()  # Asegúrate de definir este formulario
+    form = ProfileUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
-            picture_file = save_picture(form.picture.data)  # Implementa esta función para manejar la subida
-            current_user.profile_picture = picture_file
-        db.session.commit()
+            picture_file = save_picture(form.picture.data)  # Guarda la imagen
+            current_user.profile_picture = picture_file  # Actualiza el campo en el modelo
+        db.session.commit()  # Guarda cambios en la base de datos
         flash('Tu perfil ha sido actualizado.', 'success')
         return redirect(url_for('main.profile'))
-    return render_template('update_profile.html', form=form)
+    return render_template('update_profile.html', form=form)  # Asegúrate de que esta línea esté correcta
+

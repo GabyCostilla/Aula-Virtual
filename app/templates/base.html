@@ -25,10 +25,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('main.create_course') }}">Crear Curso</a> <!-- Enlace para crear un curso -->
             </li>
+            {% if current_user.is_authenticated %} <!-- Muestra el enlace de perfil solo si el usuario está autenticado -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('main.profile') }}">Mi Perfil</a>
+                <a class="nav-link" href="{{ url_for('main.profile') }}">Perfil</a> <!-- Enlace al perfil del usuario -->
             </li>
-            
+            {% endif %}
         </ul>
     </div>
 </nav>

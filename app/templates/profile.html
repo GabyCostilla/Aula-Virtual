@@ -5,27 +5,35 @@
 {% block content %}
 <div class="container">
     <h1>Perfil de {{ user.username }}</h1>
-
-    <div class="mb-4">
-        {% if user.profile_picture %}
-            <img src="{{ user.profile_picture }}" alt="Foto de perfil" class="img-fluid" style="max-width: 200px;">
-        {% else %}
-            <img src="https://via.placeholder.com/200" alt="Foto de perfil" class="img-fluid">
-        {% endif %}
-    </div>
-
     <p><strong>Email:</strong> {{ user.email }}</p>
-    <h3>Cursos en los que participo:</h3>
-    <ul>
-        {% for enrollment in courses %}
-            <li>
-                <a href="{{ url_for('main.course_detail', course_id=enrollment.course_id) }}">
-                    {{ enrollment.course.name }}
-                </a>
-            </li>
-        {% else %}
-            <li>No estás inscrito en ningún curso.</li>
-        {% endfor %}
-    </ul>
+    
+    {% if user.profile_picture %}
+        <img src="{{ url_for('static', filename='profile_pics/' + user.profile_picture) }}" alt="Foto de perfil" class="img-fluid" style="max-width: 200px;">
+    {% else %}
+        <img src="https://via.placeholder.com/200" alt="Foto de perfil" class="img-fluid">
+    {% endif %}
+    
+    <h2>Actualizar Foto de Perfil</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}  <!-- CSRF Token -->
+        <div class="form-group">
+            {{ form.picture.label(class="form-label") }}
+            {{ form.picture(class="form-control") }}  <!-- Campo de carga de archivos -->
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}  <!-- Botón para enviar el formulario -->
+        </div>
+    </form>
+    
+    <h2>Cursos Inscritos</h2>
+    {% if courses %}
+        <ul>
+            {% for enrollment in courses %}
+                <li>{{ enrollment.course.name }} - {{ enrollment.course.description }}</li>  <!-- Asegúrate de que el modelo Enrollment tenga la relación adecuada -->
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No estás inscrito en ningún curso.</p>
+    {% endif %}
 </div>
 {% endblock %}

@@ -22,5 +22,5 @@ class CourseForm(FlaskForm):
     submit = SubmitField('Crear Curso')
 
 class ProfileUpdateForm(FlaskForm):
-    picture = FileField('Actualizar Foto de Perfil', validators=[DataRequired()])
-    submit = SubmitField('Actualizar')
+    picture = FileField('Actualizar Foto de Perfil', validators=[DataRequired()])  # Campo para la carga de la foto
+    submit = SubmitField('Actualizar Foto')  # Botón de envío
