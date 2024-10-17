@@ -4,13 +4,17 @@
 
 {% block content %}
     <h2>Cursos Disponibles</h2>
-    <a href="{{ url_for('main.create_course') }}" class="btn btn-primary">Crear Nuevo Curso</a>
     <ul>
         {% for course in courses %}
             <li>
                 <strong>{{ course.name }}</strong> - {{ course.description }} 
                 <em>Del {{ course.start_date }} al {{ course.end_date }}</em>
+                <form action="{{ url_for('main.enroll', course_id=course.id) }}" method="post">
+                    <button type="submit" class="btn btn-primary">Inscribirse</button>
+                </form>
             </li>
+        {% else %}
+            <li>No hay cursos disponibles.</li>
         {% endfor %}
     </ul>
 {% endblock %}
