@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, flash,current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app
 from .forms import RegistrationForm, LoginForm, CourseForm, ProfileUpdateForm
 from .models import User, Course, Enrollment  # Asegúrate de importar Enrollment
 from .extensions import db
-from flask_login import current_user, login_required, login_user # Importar current_user y login_required
+from flask_login import current_user, login_required, login_user, logout_user
 import os
 from werkzeug.utils import secure_filename
 import secrets
@@ -36,7 +36,6 @@ def login():
             flash('Ocurrió un error al iniciar sesión. Por favor, intenta de nuevo.', 'danger')
             print(f"Error: {e}")  # Imprimir el error en la consola
     return render_template('login.html', form=form)
-
 
 
 @main_bp.route('/register', methods=['GET', 'POST'])
@@ -125,7 +124,6 @@ def profile():
     return render_template('profile.html', user=current_user, courses=user_courses, form=form)  # Pasa el formulario a la plantilla
 
 
-
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)  # Genera un nombre de archivo aleatorio
     _, f_ext = os.path.splitext(form_picture.filename)  # Obtiene la extensión del archivo
@@ -149,3 +147,9 @@ def update_profile():
         return redirect(url_for('main.profile'))
     return render_template('update_profile.html', form=form)  # Asegúrate de que esta línea esté correcta
 
+@main_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()  # Función para cerrar sesión
+    flash('Has cerrado sesión exitosamente.', 'success')
+    return redirect(url_for('main.index'))

@@ -6,6 +6,8 @@
     <title>{% block title %}Aula Virtual{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
 
@@ -13,23 +15,29 @@
     <a class="navbar-brand" href="{{ url_for('main.index') }}">Aula Virtual</a>
     <div class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('main.register') }}">Registrar</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('main.login') }}">Iniciar Sesión</a>
-            </li>
+            {% if current_user.is_authenticated %}
+                <!-- Si el usuario está autenticado, mostrar 'Perfil' y 'Cerrar sesión' -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.profile') }}">Perfil</a> <!-- Enlace al perfil del usuario -->
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.logout') }}">Cerrar Sesión</a> <!-- Enlace para cerrar sesión -->
+                </li>
+            {% else %}
+                <!-- Si el usuario no está autenticado, mostrar 'Iniciar Sesión' y 'Registrar' -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.login') }}">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.register') }}">Registrar</a>
+                </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('main.list_courses') }}">Cursos</a> <!-- Enlace a la lista de cursos -->
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('main.create_course') }}">Crear Curso</a> <!-- Enlace para crear un curso -->
             </li>
-            {% if current_user.is_authenticated %} <!-- Muestra el enlace de perfil solo si el usuario está autenticado -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('main.profile') }}">Perfil</a> <!-- Enlace al perfil del usuario -->
-            </li>
-            {% endif %}
         </ul>
     </div>
 </nav>
@@ -51,5 +59,28 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Este script detecta los mensajes flash y usa SweetAlert2 para mostrarlos
+    document.addEventListener('DOMContentLoaded', function() {
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Atención!',
+                        text: "{{ message }}",
+                        showConfirmButton: true,
+                        confirmButtonText: 'Ok',
+                    });
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    });
+</script>
+
 </body>
 </html>
