@@ -7,7 +7,6 @@ import os
 from werkzeug.utils import secure_filename
 import secrets
 
-
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
@@ -36,7 +35,6 @@ def login():
             flash('Ocurrió un error al iniciar sesión. Por favor, intenta de nuevo.', 'danger')
             print(f"Error: {e}")  # Imprimir el error en la consola
     return render_template('login.html', form=form)
-
 
 @main_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -83,10 +81,10 @@ def create_course():
     return render_template('create_course.html', form=form)
 
 @main_bp.route('/course/<int:course_id>', methods=['GET'])
+@login_required  # Solo los usuarios logueados pueden ver la información detallada
 def course_detail(course_id):
     course = Course.query.get_or_404(course_id)  # Obtiene el curso por ID
-    return render_template('course_detail.html', course=course)  # Muestra la plantilla con el curso
-
+    return render_template('course_detail.html', course=course)  # Muestra la plantilla con los detalles del curso
 
 @main_bp.route('/enroll/<int:course_id>', methods=['POST'])
 @login_required  # Asegúrate de que solo los usuarios autenticados puedan inscribirse
@@ -123,7 +121,6 @@ def profile():
 
     return render_template('profile.html', user=current_user, courses=user_courses, form=form)  # Pasa el formulario a la plantilla
 
-
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)  # Genera un nombre de archivo aleatorio
     _, f_ext = os.path.splitext(form_picture.filename)  # Obtiene la extensión del archivo
@@ -132,7 +129,6 @@ def save_picture(form_picture):
 
     form_picture.save(picture_path)  # Guarda la imagen
     return picture_fn  # Devuelve el nombre del archivo
-
 
 @main_bp.route('/update_profile', methods=['GET', 'POST'])
 @login_required

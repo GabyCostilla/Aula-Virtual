@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
 
-{% block title %}Detalles del Curso: {{ course.name }}{% endblock %}
+{% block title %}Detalles del Curso{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>{{ course.name }}</h1>
-    <p>{{ course.description }}</p>
-    <p><strong>Fecha de Inicio:</strong> {{ course.start_date }}</p>
-    <p><strong>Fecha de Fin:</strong> {{ course.end_date }}</p>
+    <h1>Detalles del Curso</h1>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ course.name }}</h2>
+            <p class="card-text">{{ course.description }}</p>
+            <p class="card-text"><strong>Fecha de inicio:</strong> {{ course.start_date }}</p>
+            <p class="card-text"><strong>Fecha de finalización:</strong> {{ course.end_date }}</p>
+        </div>
+    </div>
+    <a href="{{ url_for('main.list_courses') }}" class="btn btn-secondary mt-3">Volver a la lista de cursos</a>
 </div>
 {% endblock %}
