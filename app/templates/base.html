@@ -80,6 +80,17 @@
             {% endif %}
         {% endwith %}
     });
+
+    // Mostrar alerta si el usuario intenta acceder sin estar autenticado
+    {% if not current_user.is_authenticated %}
+        Swal.fire({
+            icon: 'warning',
+            title: 'Acceso restringido',
+            text: 'Debes iniciar sesión o registrarte para continuar.',
+            showConfirmButton: true,
+            confirmButtonText: 'Ok'
+        });
+    {% endif %}
 </script>
 
 </body>

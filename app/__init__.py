@@ -1,6 +1,6 @@
-from flask import Flask
+from flask import Flask, redirect, url_for, flash
 from flask_migrate import Migrate
-from .extensions import db, login_manager  # Asegúrate de que db y login_manager están importados desde extensions.py
+from .extensions import db, login_manager  # Asegúrate de que db y login_manager están importados
 from .models import User  # Importar el modelo User
 
 def create_app():
@@ -22,5 +22,11 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))  # Devuelve el usuario por ID desde la base de datos
+
+    # Manejar el acceso no autorizado a rutas protegidas
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        flash('Debes iniciar sesión o registrarte para acceder a esta página.', 'warning')
+        return redirect(url_for('main.login'))  # Redirigir a la página de login si no está autenticado
 
     return app
