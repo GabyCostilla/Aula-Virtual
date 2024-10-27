@@ -1,18 +1,29 @@
-{% extends 'base.html' %}
-
-{% block title %}Detalles del Curso{% endblock %}
+<!-- course_detail.html -->
+{% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h1>Detalles del Curso</h1>
-    <div class="card">
-        <div class="card-body">
-            <h2 class="card-title">{{ course.name }}</h2>
-            <p class="card-text">{{ course.description }}</p>
-            <p class="card-text"><strong>Fecha de inicio:</strong> {{ course.start_date }}</p>
-            <p class="card-text"><strong>Fecha de finalización:</strong> {{ course.end_date }}</p>
-        </div>
-    </div>
-    <a href="{{ url_for('main.list_courses') }}" class="btn btn-secondary mt-3">Volver a la lista de cursos</a>
-</div>
+<h1>{{ course.name }}</h1>
+<p>{{ course.description }}</p>
+<p><strong>Creado por:</strong> {{ course.creator.username }}</p>
+
+{% if current_user.id == course.creator_id %}
+    <!-- Botón para eliminar el curso (solo visible para el creador) -->
+    <form action="{{ url_for('main.delete_course', course_id=course.id) }}" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este curso?');">
+            Eliminar Curso
+        </button>
+    </form>
+    <!-- Botón para crear una nueva tarea -->
+    <a href="{{ url_for('main.create_task', course_id=course.id) }}" class="btn btn-primary">Crear Tarea</a>
+{% endif %}
+
+<h3>Tareas del Curso</h3>
+<ul>
+    {% for task in course.tasks %}
+        <li>{{ task.title }} - {{ task.description }}</li>
+    {% else %}
+        <p>No hay tareas creadas para este curso.</p>
+    {% endfor %}
+</ul>
+
 {% endblock %}

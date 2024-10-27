@@ -21,6 +21,12 @@ class CourseForm(FlaskForm):
     end_date = DateField('Fecha de Finalización', format='%Y-%m-%d', validators=[DataRequired()])
     submit = SubmitField('Crear Curso')
 
+class TaskForm(FlaskForm):
+    title = StringField('Título', validators=[DataRequired()])
+    description = TextAreaField('Descripción', validators=[DataRequired()])
+    due_date = DateField('Fecha de entrega', validators=[DataRequired()])
+    submit = SubmitField('Añadir Tarea')
+
 class ProfileUpdateForm(FlaskForm):
     picture = FileField('Actualizar Foto de Perfil', validators=[DataRequired()])  # Campo para la carga de la foto
     submit = SubmitField('Actualizar Foto')  # Botón de envío

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, current_app
-from .forms import RegistrationForm, LoginForm, CourseForm, ProfileUpdateForm
-from .models import User, Course, Enrollment  # Asegúrate de importar Enrollment
+from .forms import RegistrationForm, LoginForm, CourseForm, ProfileUpdateForm,TaskForm
+from .models import User, Course, Enrollment, Task
 from .extensions import db
 from flask_login import current_user, login_required, login_user, logout_user
 import os
@@ -64,7 +64,7 @@ def list_courses():
     return render_template('courses.html', courses=courses)
 
 @main_bp.route('/create-course', methods=['GET', 'POST'])
-@login_required  # Solo los usuarios logueados pueden crear cursos
+@login_required
 def create_course():
     form = CourseForm()
     if form.validate_on_submit():
@@ -72,13 +72,15 @@ def create_course():
             name=form.name.data,
             description=form.description.data,
             start_date=form.start_date.data,
-            end_date=form.end_date.data
+            end_date=form.end_date.data,
+            creator_id=current_user.id  # Asigna el ID del usuario autenticado
         )
         db.session.add(course)
         db.session.commit()
         flash('Curso creado exitosamente.', 'success')
         return redirect(url_for('main.list_courses'))
     return render_template('create_course.html', form=form)
+
 
 @main_bp.route('/course/<int:course_id>', methods=['GET'])
 @login_required  # Solo los usuarios logueados pueden ver la información detallada
@@ -104,6 +106,44 @@ def enroll(course_id):
         flash('¡Te has inscrito correctamente en el curso!', 'success')
     
     return redirect(url_for('main.list_courses'))
+
+@main_bp.route('/course/<int:course_id>/delete', methods=['POST'])
+@login_required
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    if current_user.id != course.creator_id:
+        flash('No tienes permiso para eliminar este curso.', 'danger')
+        return redirect(url_for('main.course_detail', course_id=course_id))
+    
+    db.session.delete(course)
+    db.session.commit()
+    flash('El curso ha sido eliminado correctamente.', 'success')
+    return redirect(url_for('main.list_courses'))
+
+# Ruta para crear una nueva tarea
+@main_bp.route('/course/<int:course_id>/create-task', methods=['GET', 'POST'])
+@login_required
+def create_task(course_id):
+    course = Course.query.get_or_404(course_id)
+    if current_user.id != course.creator_id:
+        flash('No tienes permiso para agregar tareas a este curso.', 'danger')
+        return redirect(url_for('main.course_detail', course_id=course_id))
+
+    form = TaskForm()
+    if form.validate_on_submit():
+        task = Task(
+            title=form.title.data,
+            description=form.description.data,
+            due_date=form.due_date.data,
+            course_id=course.id
+        )
+        db.session.add(task)
+        db.session.commit()
+        flash('Tarea creada exitosamente.', 'success')
+        return redirect(url_for('main.course_detail', course_id=course.id))
+    
+    return render_template('create_task.html', form=form, course=course)
+
 
 @main_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
