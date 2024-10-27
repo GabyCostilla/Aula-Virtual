@@ -1,32 +1,26 @@
-from flask import Flask, redirect, url_for, flash
-from flask_migrate import Migrate
-from .extensions import db, login_manager  # Asegúrate de que db y login_manager están importados
-from .models import User  # Importar el modelo User
+<!-- courses.html -->
+{% extends "base.html" %}
 
-def create_app():
-    app = Flask(__name__)
+{% block title %}Cursos Disponibles{% endblock %}
 
-    # Cargar la configuración desde config.py
-    app.config.from_object('config.Config')
-
-    # Inicializar las extensiones
-    db.init_app(app)
-    login_manager.init_app(app)
-    migrate = Migrate(app, db)  # Integración de Flask-Migrate para migraciones de base de datos
-
-    # Registrar Blueprints
-    from .routes import main_bp
-    app.register_blueprint(main_bp)
-
-    # Cargar el usuario desde la sesión cuando el login_manager lo necesite
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))  # Devuelve el usuario por ID desde la base de datos
-
-    # Manejar el acceso no autorizado a rutas protegidas
-    @login_manager.unauthorized_handler
-    def unauthorized():
-        flash('Debes iniciar sesión o registrarte para acceder a esta página.', 'warning')
-        return redirect(url_for('main.login'))  # Redirigir a la página de login si no está autenticado
-
-    return app
+{% block content %}
+<h1>Cursos Disponibles</h1>
+<div class="list-group">
+    {% for course in courses %}
+        <div class="list-group-item">
+            <h5>{{ course.name }}</h5>
+            <p>{{ course.description[:100] }}... </p> <!-- Muestra una descripción abreviada -->
+            
+            <!-- Botón para ver más información -->
+            <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-info btn-sm">
+                Ver más información
+            </a>
+            
+            <!-- Botón para inscribirse -->
+            <form action="{{ url_for('main.enroll', course_id=course.id) }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-primary btn-sm">Inscribirse</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
