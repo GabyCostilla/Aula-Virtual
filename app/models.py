@@ -1,3 +1,4 @@
+from datetime import datetime
 from .extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -18,7 +19,6 @@ class User(db.Model, UserMixin):
         """Verifica si la contraseña proporcionada coincide con la contraseña hasheada."""
         return check_password_hash(self.password, password)
 
-   
     @property
     def is_active(self):
         return True  
@@ -38,7 +38,6 @@ class Course(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) 
     tasks = db.relationship('Task', back_populates='course', cascade='all, delete-orphan')
 
-
 class Enrollment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -54,7 +53,15 @@ class Task(db.Model):
     description = db.Column(db.Text, nullable=False)
     due_date = db.Column(db.Date, nullable=True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)  
-
     course = db.relationship('Course', back_populates='tasks')
+    submissions = db.relationship('Submission', backref='task', lazy=True)
 
+class Submission(db.Model):
+    __tablename__ = 'submission'
+    id = db.Column(db.Integer, primary_key=True)
+    file_path = db.Column(db.String(150), nullable=False)
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)  # Relación corregida
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student = db.relationship('User', backref='submissions')  # Relación con User
 

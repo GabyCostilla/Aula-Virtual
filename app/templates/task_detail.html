@@ -1,0 +1,26 @@
+<!-- templates/task_detail.html -->
+
+{% extends "base.html" %}
+{% block title %}Detalle de Tarea{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>{{ task.title }}</h1>
+    <p>{{ task.description }}</p>
+    <p><strong>Fecha de entrega:</strong> {{ task.due_date }}</p>
+
+    <h2>Entregas</h2>
+    {% if submissions %}
+        <ul>
+            {% for submission in submissions %}
+                <li>
+                    <a href="{{ url_for('static', filename='submissions/' + submission.file_path) }}" target="_blank">
+                        {{ submission.file_path }}
+                    </a> - Entregado el {{ submission.submitted_at }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay entregas todavía.</p>
+    {% endif %}
+</div>
+{% endblock %}

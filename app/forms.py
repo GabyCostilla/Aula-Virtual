@@ -30,3 +30,7 @@ class TaskForm(FlaskForm):
 class ProfileUpdateForm(FlaskForm):
     picture = FileField('Actualizar Foto de Perfil', validators=[DataRequired()])
     submit = SubmitField('Actualizar Foto')  
+
+class SubmissionForm(FlaskForm):
+    file = FileField('Subir Tarea', validators=[DataRequired()])
+    submit = SubmitField('Enviar')
