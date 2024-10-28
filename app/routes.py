@@ -33,7 +33,7 @@ def login():
                 flash('Correo o contraseña incorrectos.', 'danger')
         except Exception as e:
             flash('Ocurrió un error al iniciar sesión. Por favor, intenta de nuevo.', 'danger')
-            print(f"Error: {e}")  # Imprimir el error en la consola
+            print(f"Error: {e}")  
     return render_template('login.html', form=form)
 
 @main_bp.route('/register', methods=['GET', 'POST'])
@@ -44,7 +44,7 @@ def register():
             username=form.username.data,
             email=form.email.data,
         )
-        user.set_password(form.password.data)  # Asegúrate de hashear la contraseña aquí
+        user.set_password(form.password.data)  
         db.session.add(user)
         db.session.commit()
         flash('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success')
@@ -52,15 +52,15 @@ def register():
     return render_template('register.html', form=form)
 
 @main_bp.route('/courses', methods=['GET'])
-@login_required  # Solo los usuarios logueados pueden acceder a los cursos
+@login_required  
 def list_courses():
-    # Depuración: Imprimir si el usuario está autenticado
-    print(f"Usuario autenticado: {current_user.is_authenticated}")  # Esto debería imprimir True si el usuario ha iniciado sesión correctamente
+  
+    print(f"Usuario autenticado: {current_user.is_authenticated}")  
     
-    # Obtener todos los cursos
+
     courses = Course.query.all()  
     
-    # Renderizar la plantilla con la lista de cursos
+   
     return render_template('courses.html', courses=courses)
 
 @main_bp.route('/create-course', methods=['GET', 'POST'])
@@ -73,7 +73,7 @@ def create_course():
             description=form.description.data,
             start_date=form.start_date.data,
             end_date=form.end_date.data,
-            creator_id=current_user.id  # Asigna el ID del usuario autenticado
+            creator_id=current_user.id  
         )
         db.session.add(course)
         db.session.commit()
@@ -83,23 +83,23 @@ def create_course():
 
 
 @main_bp.route('/course/<int:course_id>', methods=['GET'])
-@login_required  # Solo los usuarios logueados pueden ver la información detallada
+@login_required  
 def course_detail(course_id):
-    course = Course.query.get_or_404(course_id)  # Obtiene el curso por ID
-    return render_template('course_detail.html', course=course)  # Muestra la plantilla con los detalles del curso
+    course = Course.query.get_or_404(course_id)  
+    return render_template('course_detail.html', course=course) 
 
 @main_bp.route('/enroll/<int:course_id>', methods=['POST'])
-@login_required  # Asegúrate de que solo los usuarios autenticados puedan inscribirse
+@login_required  
 def enroll(course_id):
-    course = Course.query.get_or_404(course_id)  # Verifica que el curso exista
+    course = Course.query.get_or_404(course_id)  
     
-    # Verifica si el usuario ya está inscrito en el curso
+
     enrollment = Enrollment.query.filter_by(user_id=current_user.id, course_id=course_id).first()
     
     if enrollment:
         flash('Ya estás inscrito en este curso.', 'warning')
     else:
-        # Crear la inscripción
+       
         new_enrollment = Enrollment(user_id=current_user.id, course_id=course_id)
         db.session.add(new_enrollment)
         db.session.commit()
@@ -120,7 +120,7 @@ def delete_course(course_id):
     flash('El curso ha sido eliminado correctamente.', 'success')
     return redirect(url_for('main.list_courses'))
 
-# Ruta para crear una nueva tarea
+
 @main_bp.route('/course/<int:course_id>/create-task', methods=['GET', 'POST'])
 @login_required
 def create_task(course_id):
@@ -148,27 +148,27 @@ def create_task(course_id):
 @main_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    form = ProfileUpdateForm()  # Crea una instancia del formulario
-    user_courses = Enrollment.query.filter_by(user_id=current_user.id).all()  # Obtener cursos en los que está inscrito el usuario
+    form = ProfileUpdateForm()  
+    user_courses = Enrollment.query.filter_by(user_id=current_user.id).all()  
 
     if form.validate_on_submit():
         if form.picture.data:
-            picture_file = save_picture(form.picture.data)  # Llama a la función para guardar la imagen
-            current_user.profile_picture = picture_file  # Actualiza el campo de foto de perfil en la base de datos
-        db.session.commit()  # Guarda cambios en la base de datos
-        flash('Tu perfil ha sido actualizado.', 'success')  # Mensaje de éxito
-        return redirect(url_for('main.profile'))  # Redirige al perfil del usuario
+            picture_file = save_picture(form.picture.data)  
+            current_user.profile_picture = picture_file 
+        db.session.commit()  
+        flash('Tu perfil ha sido actualizado.', 'success')  
+        return redirect(url_for('main.profile')) 
 
-    return render_template('profile.html', user=current_user, courses=user_courses, form=form)  # Pasa el formulario a la plantilla
+    return render_template('profile.html', user=current_user, courses=user_courses, form=form) 
 
 def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)  # Genera un nombre de archivo aleatorio
-    _, f_ext = os.path.splitext(form_picture.filename)  # Obtiene la extensión del archivo
-    picture_fn = random_hex + f_ext  # Combina el nombre aleatorio con la extensión
-    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)  # Define la ruta de almacenamiento
+    random_hex = secrets.token_hex(8) 
+    _, f_ext = os.path.splitext(form_picture.filename)  
+    picture_fn = random_hex + f_ext  
+    picture_path = os.path.join(current_app.root_path, 'static/profile_pics', picture_fn)  
 
-    form_picture.save(picture_path)  # Guarda la imagen
-    return picture_fn  # Devuelve el nombre del archivo
+    form_picture.save(picture_path)  
+    return picture_fn  
 
 @main_bp.route('/update_profile', methods=['GET', 'POST'])
 @login_required
@@ -176,13 +176,12 @@ def update_profile():
     form = ProfileUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
-            picture_file = save_picture(form.picture.data)  # Guarda la imagen
-            current_user.profile_picture = picture_file  # Actualiza el campo en el modelo
-        db.session.commit()  # Guarda cambios en la base de datos
+            picture_file = save_picture(form.picture.data)  
+            current_user.profile_picture = picture_file 
+        db.session.commit()  
         flash('Tu perfil ha sido actualizado.', 'success')
         return redirect(url_for('main.profile'))
-    return render_template('update_profile.html', form=form)  # Asegúrate de que esta línea esté correcta
-
+    return render_template('update_profile.html', form=form) 
 @main_bp.route('/logout')
 @login_required
 def logout():
