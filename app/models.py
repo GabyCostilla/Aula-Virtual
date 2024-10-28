@@ -2,12 +2,12 @@ from .extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(db.Model, UserMixin):  # Hereda de UserMixin
+class User(db.Model, UserMixin): 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(256), nullable=False)
-    profile_picture = db.Column(db.String(256), nullable=True)  # Campo para la URL de la foto
+    profile_picture = db.Column(db.String(256), nullable=True) 
     courses_created = db.relationship('Course', backref='creator', lazy=True)
 
     def set_password(self, password):
@@ -18,18 +18,16 @@ class User(db.Model, UserMixin):  # Hereda de UserMixin
         """Verifica si la contraseña proporcionada coincide con la contraseña hasheada."""
         return check_password_hash(self.password, password)
 
-    # Métodos requeridos por Flask-Login
+   
     @property
     def is_active(self):
-        return True  # O implementa tu lógica si necesitas
-
+        return True  
     @property
     def is_authenticated(self):
-        return True  # Esto es verdadero para todos los usuarios autenticados
-
+        return True  
     @property
     def is_anonymous(self):
-        return False  # Nunca debería ser anónimo si está autenticado
+        return False  
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,7 +53,7 @@ class Task(db.Model):
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=False)
     due_date = db.Column(db.Date, nullable=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)  # Foreign key to course.id
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)  
 
     course = db.relationship('Course', back_populates='tasks')
 
